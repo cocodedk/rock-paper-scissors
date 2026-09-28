@@ -1,7 +1,9 @@
 (function () {
   var PICKS = ['rock', 'paper', 'scissors'];
   var BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
-  var OUTCOME = { player1: '🏆 Player 1 wins.', player2: '🏆 Player 2 wins.', draw: '🤝 Draw.' };
+  var P1 = '🤖 Player 1';
+  var P2 = '👾 Player 2';
+  var OUTCOME = { player1: '🏆 ' + P1 + ' wins.', player2: '🏆 ' + P2 + ' wins.', draw: '🤝 Draw.' };
   var SIGN = { rock: '✊', paper: '✋', scissors: '✌️' };
 
   function showPick(p) {
@@ -18,7 +20,7 @@
   }
 
   function describeRound(round) {
-    return 'Player 1: ' + showPick(round.player1) + ', Player 2: ' + showPick(round.player2) + '. ' + OUTCOME[round.result];
+    return P1 + ': ' + showPick(round.player1) + ', ' + P2 + ': ' + showPick(round.player2) + '. ' + OUTCOME[round.result];
   }
 
   function createGame(random) {
@@ -52,7 +54,7 @@
     var history = game.history();
     return [
       'Latest round: ' + (history.length ? describeRound(history[0]) : 'none yet.'),
-      'Score: Player 1 wins ' + s.player1 + ', Player 2 wins ' + s.player2 + ', draws ' + s.draws,
+      'Score: ' + P1 + ' wins ' + s.player1 + ', ' + P2 + ' wins ' + s.player2 + ', draws ' + s.draws,
       'Rounds played: ' + s.rounds,
       '',
       'Last 10 rounds, newest first:'
