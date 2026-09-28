@@ -137,20 +137,68 @@ test('the loop starts by itself and plays one round per tick', () => {
   assert.match(el.textContent, /Score: 🤖 Player 1 🏆 wins \d+, 👾 Player 2 🏆 wins \d+, 🤝 draws \d+/u);
 });
 
-test('index.html loads game.js with a plain script tag and has no img, canvas or svg', () => {
+const brandCss = '<link rel="stylesheet" href="https://brand.cocode.dk/v1.css">';
+const brandJs = '<script type="module" src="https://brand.cocode.dk/v1.js"></script>';
+
+test('index.html loads game.js with a plain script tag, the frame is its only module, and it has no img, canvas or svg', () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.match(html, /<script src="game\.js"><\/script>/);
-  assert.doesNotMatch(html, /type="module"/);
+  assert.deepStrictEqual(html.match(/<script\b[^>]*>/g), [
+    '<script type="module" src="https://brand.cocode.dk/v1.js">',
+    '<script src="game.js">',
+  ]);
   assert.doesNotMatch(html, /<(img|canvas|svg)\b/i);
 });
 
-test('index.html sets the font size to 150% in one inline style rule and loads no external stylesheet', () => {
+test('index.html sets the font size to 150% in one inline style rule and its only external stylesheet is the frame', () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const styles = html.match(/<style>[\s\S]*?<\/style>/g) || [];
   assert.deepStrictEqual(styles, ['<style>html { font-size: 150%; }</style>']);
-  assert.doesNotMatch(html, /<link\b/i);
+  assert.deepStrictEqual(html.match(/<link\b[^>]*>/gi), [brandCss]);
   assert.doesNotMatch(html, /\sstyle=/i);
   assert.doesNotMatch(html, /@import/i);
+});
+
+test('index.html loads the cocode.dk frame in its head, has the description, and wraps the game in cocode-head and cocode-foot', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const head = html.match(/<head>([\s\S]*?)<\/head>/)[1];
+  assert.ok(head.includes(brandCss));
+  assert.ok(head.includes(brandJs));
+  assert.ok(head.includes('<meta name="description" content="Two computer players, 🤖 and 👾, play rock paper scissors by themselves, one round a second.">'));
+  const body = html.match(/<body>([\s\S]*?)<\/body>/)[1].trim().split('\n');
+  assert.deepStrictEqual(body, [
+    '<cocode-head project="Rock paper scissors" accent="#7048e8" on-accent="#ffffff" links="Source:https://github.com/cocodedk/rock-paper-scissors"><a href="https://cocode.dk">cocode.dk</a></cocode-head>',
+    '<h1>Rock paper scissors</h1>',
+    '<pre id="game"></pre>',
+    '<cocode-foot project="Rock paper scissors" repo="cocodedk/rock-paper-scissors"><a href="https://cocode.dk">Made by Babak</a></cocode-foot>',
+    '<script src="game.js"></script>',
+  ]);
+});
+
+test('pages.yml deploys on push to main with pinned actions and copies exactly index.html, game.js and llms.txt', () => {
+  const yml = fs.readFileSync(path.join(root, '.github', 'workflows', 'pages.yml'), 'utf8');
+  for (const line of [
+    'name: Deploy Pages',
+    '  push:\n    branches: [main]\n  workflow_dispatch:',
+    'permissions:\n  contents: read\n  pages: write\n  id-token: write',
+    'concurrency:\n  group: pages\n  cancel-in-progress: false',
+    'jobs:\n  deploy:',
+    '      name: github-pages',
+    '      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4',
+    '        run: mkdir _site && cp index.html game.js llms.txt _site/',
+    '      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0',
+    '      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0\n        with:\n          path: _site',
+    '      - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1\n        id: deployment',
+  ]) assert.ok(yml.includes(line), line);
+  assert.deepStrictEqual(yml.split('jobs:')[1].match(/^ {2}\S.*:$/gm), ['  deploy:']);
+  assert.strictEqual((yml.match(/\bcp\b/g) || []).length, 1);
+  assert.strictEqual((yml.match(/uses:/g) || []).length, 4);
+});
+
+test('README.md has the play link and the test command', () => {
+  const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
+  assert.ok(readme.includes('Play it: https://cocodedk.github.io/rock-paper-scissors/'));
+  assert.ok(readme.includes('`node --test`'));
 });
 
 test('with a fake modelContext both tools are registered and answer', async () => {
