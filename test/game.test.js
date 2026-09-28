@@ -136,6 +136,15 @@ test('index.html loads game.js with a plain script tag and has no img, canvas or
   assert.doesNotMatch(html, /<(img|canvas|svg)\b/i);
 });
 
+test('index.html sets the font size to 150% in one inline style rule and loads no external stylesheet', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const styles = html.match(/<style>[\s\S]*?<\/style>/g) || [];
+  assert.deepStrictEqual(styles, ['<style>html { font-size: 150%; }</style>']);
+  assert.doesNotMatch(html, /<link\b/i);
+  assert.doesNotMatch(html, /\sstyle=/i);
+  assert.doesNotMatch(html, /@import/i);
+});
+
 test('with a fake modelContext both tools are registered and answer', async () => {
   const tools = {};
   const { ticks } = loadInPage({ registerTool: (tool) => { tools[tool.name] = tool; } });
