@@ -45,16 +45,16 @@ test('a round with a fixed random source gives the expected picks and result', (
   const g = game.createGame(sequence([0, 0.9]));
   const round = g.playRound();
   assert.deepStrictEqual(round, { player1: 'rock', player2: 'scissors', result: 'player1' });
-  assert.strictEqual(game.describeRound(round), 'Player 1: ✊ rock, Player 2: ✌️ scissors. 🏆 Player 1 wins.');
+  assert.strictEqual(game.describeRound(round), '🤖 Player 1: ✊ rock, 👾 Player 2: ✌️ scissors. 🏆 🤖 Player 1 wins.');
 });
 
 test('each result shows its emoji before its words, in the latest round and the history', () => {
   // rock/scissors, rock/paper, paper/paper
   const g = game.createGame(sequence([0, 0.9, 0, 0.5, 0.5, 0.5]));
   for (let i = 0; i < 3; i++) g.playRound();
-  const draw = 'Player 1: ✋ paper, Player 2: ✋ paper. 🤝 Draw.';
-  const p2 = 'Player 1: ✊ rock, Player 2: ✋ paper. 🏆 Player 2 wins.';
-  const p1 = 'Player 1: ✊ rock, Player 2: ✌️ scissors. 🏆 Player 1 wins.';
+  const draw = '🤖 Player 1: ✋ paper, 👾 Player 2: ✋ paper. 🤝 Draw.';
+  const p2 = '🤖 Player 1: ✊ rock, 👾 Player 2: ✋ paper. 🏆 👾 Player 2 wins.';
+  const p1 = '🤖 Player 1: ✊ rock, 👾 Player 2: ✌️ scissors. 🏆 🤖 Player 1 wins.';
   const lines = game.render(g).split('\n');
   assert.strictEqual(lines[0], 'Latest round: ' + draw);
   assert.deepStrictEqual(lines.slice(5), [draw, p2, p1]);
@@ -70,11 +70,30 @@ test('each pick shows its emoji then its word, in the latest round and the histo
   const g = game.createGame(sequence([0.5, 0, 0.9, 0.5]));
   g.playRound();
   g.playRound();
-  const newest = 'Player 1: ✌️ scissors, Player 2: ✋ paper. 🏆 Player 1 wins.';
-  const oldest = 'Player 1: ✋ paper, Player 2: ✊ rock. 🏆 Player 1 wins.';
+  const newest = '🤖 Player 1: ✌️ scissors, 👾 Player 2: ✋ paper. 🏆 🤖 Player 1 wins.';
+  const oldest = '🤖 Player 1: ✋ paper, 👾 Player 2: ✊ rock. 🏆 🤖 Player 1 wins.';
   const lines = game.render(g).split('\n');
   assert.strictEqual(lines[0], 'Latest round: ' + newest);
   assert.deepStrictEqual(lines.slice(5), [newest, oldest]);
+});
+
+test('each player shows its emoji before its name, in the rounds, the results and the score', () => {
+  // rock/scissors, paper/paper, rock/rock, paper/scissors
+  const g = game.createGame(sequence([0, 0.9, 0.5, 0.5, 0, 0, 0.5, 0.9]));
+  for (let i = 0; i < 4; i++) g.playRound();
+  const p2 = '🤖 Player 1: ✋ paper, 👾 Player 2: ✌️ scissors. 🏆 👾 Player 2 wins.';
+  const drawRock = '🤖 Player 1: ✊ rock, 👾 Player 2: ✊ rock. 🤝 Draw.';
+  const drawPaper = '🤖 Player 1: ✋ paper, 👾 Player 2: ✋ paper. 🤝 Draw.';
+  const p1 = '🤖 Player 1: ✊ rock, 👾 Player 2: ✌️ scissors. 🏆 🤖 Player 1 wins.';
+  const lines = game.render(g).split('\n');
+  assert.strictEqual(lines[0], 'Latest round: ' + p2);
+  assert.strictEqual(lines[1], 'Score: 🤖 Player 1 wins 1, 👾 Player 2 wins 1, draws 2');
+  assert.deepStrictEqual(lines.slice(5), [p2, drawRock, drawPaper, p1]);
+  // no player name appears without its emoji right before it
+  for (const line of lines) {
+    assert.doesNotMatch(line, /(^|[^🤖] )Player 1/u, line);
+    assert.doesNotMatch(line, /(^|[^👾] )Player 2/u, line);
+  }
 });
 
 test('the score and round count after a fixed sequence of rounds', () => {
@@ -103,11 +122,11 @@ test('the loop starts by itself and plays one round per tick', () => {
   assert.match(el.textContent, /Rounds played: 0/);
   ticks[0].fn();
   assert.match(el.textContent, /Rounds played: 1/);
-  assert.match(el.textContent, /Latest round: Player 1: (✊ rock|✋ paper|✌️ scissors), Player 2: (✊ rock|✋ paper|✌️ scissors)\. (🏆 Player 1 wins|🏆 Player 2 wins|🤝 Draw)\./);
+  assert.match(el.textContent, /Latest round: 🤖 Player 1: (✊ rock|✋ paper|✌️ scissors), 👾 Player 2: (✊ rock|✋ paper|✌️ scissors)\. (🏆 🤖 Player 1 wins|🏆 👾 Player 2 wins|🤝 Draw)\./u);
   ticks[0].fn();
   ticks[0].fn();
   assert.match(el.textContent, /Rounds played: 3/);
-  assert.match(el.textContent, /Score: Player 1 wins \d+, Player 2 wins \d+, draws \d+/);
+  assert.match(el.textContent, /Score: 🤖 Player 1 wins \d+, 👾 Player 2 wins \d+, draws \d+/u);
 });
 
 test('index.html loads game.js with a plain script tag and has no img, canvas or svg', () => {
