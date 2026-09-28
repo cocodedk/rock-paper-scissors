@@ -2,6 +2,11 @@
   var PICKS = ['rock', 'paper', 'scissors'];
   var BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
   var OUTCOME = { player1: 'Player 1 wins.', player2: 'Player 2 wins.', draw: 'Draw.' };
+  var SIGN = { rock: '✊', paper: '✋', scissors: '✌️' };
+
+  function showPick(p) {
+    return SIGN[p] + ' ' + p;
+  }
 
   function result(pick1, pick2) {
     if (pick1 === pick2) return 'draw';
@@ -13,7 +18,7 @@
   }
 
   function describeRound(round) {
-    return 'Player 1: ' + round.player1 + ', Player 2: ' + round.player2 + '. ' + OUTCOME[round.result];
+    return 'Player 1: ' + showPick(round.player1) + ', Player 2: ' + showPick(round.player2) + '. ' + OUTCOME[round.result];
   }
 
   function createGame(random) {
