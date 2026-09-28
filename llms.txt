@@ -1,0 +1,10 @@
+# Rock paper scissors
+
+Two computer players play rock paper scissors by themselves, one round per second, shown as text.
+
+## WebMCP tools
+
+`index.html` declares these tools with `document.modelContext.registerTool`:
+
+- `describe`: returns one sentence saying what is on the page.
+- `get_score`: returns `{ rounds, player1, player2, draws }`.
