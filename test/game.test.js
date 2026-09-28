@@ -45,7 +45,24 @@ test('a round with a fixed random source gives the expected picks and result', (
   const g = game.createGame(sequence([0, 0.9]));
   const round = g.playRound();
   assert.deepStrictEqual(round, { player1: 'rock', player2: 'scissors', result: 'player1' });
-  assert.strictEqual(game.describeRound(round), 'Player 1: ✊ rock, Player 2: ✌️ scissors. Player 1 wins.');
+  assert.strictEqual(game.describeRound(round), 'Player 1: ✊ rock, Player 2: ✌️ scissors. 🏆 Player 1 wins.');
+});
+
+test('each result shows its emoji before its words, in the latest round and the history', () => {
+  // rock/scissors, rock/paper, paper/paper
+  const g = game.createGame(sequence([0, 0.9, 0, 0.5, 0.5, 0.5]));
+  for (let i = 0; i < 3; i++) g.playRound();
+  const draw = 'Player 1: ✋ paper, Player 2: ✋ paper. 🤝 Draw.';
+  const p2 = 'Player 1: ✊ rock, Player 2: ✋ paper. 🏆 Player 2 wins.';
+  const p1 = 'Player 1: ✊ rock, Player 2: ✌️ scissors. 🏆 Player 1 wins.';
+  const lines = game.render(g).split('\n');
+  assert.strictEqual(lines[0], 'Latest round: ' + draw);
+  assert.deepStrictEqual(lines.slice(5), [draw, p2, p1]);
+  for (const [values, text] of [[[0, 0.9], p1], [[0, 0.5], p2]]) {
+    const one = game.createGame(sequence(values));
+    one.playRound();
+    assert.strictEqual(game.render(one).split('\n')[0], 'Latest round: ' + text);
+  }
 });
 
 test('each pick shows its emoji then its word, in the latest round and the history', () => {
@@ -53,8 +70,8 @@ test('each pick shows its emoji then its word, in the latest round and the histo
   const g = game.createGame(sequence([0.5, 0, 0.9, 0.5]));
   g.playRound();
   g.playRound();
-  const newest = 'Player 1: ✌️ scissors, Player 2: ✋ paper. Player 1 wins.';
-  const oldest = 'Player 1: ✋ paper, Player 2: ✊ rock. Player 1 wins.';
+  const newest = 'Player 1: ✌️ scissors, Player 2: ✋ paper. 🏆 Player 1 wins.';
+  const oldest = 'Player 1: ✋ paper, Player 2: ✊ rock. 🏆 Player 1 wins.';
   const lines = game.render(g).split('\n');
   assert.strictEqual(lines[0], 'Latest round: ' + newest);
   assert.deepStrictEqual(lines.slice(5), [newest, oldest]);
@@ -86,7 +103,7 @@ test('the loop starts by itself and plays one round per tick', () => {
   assert.match(el.textContent, /Rounds played: 0/);
   ticks[0].fn();
   assert.match(el.textContent, /Rounds played: 1/);
-  assert.match(el.textContent, /Latest round: Player 1: (✊ rock|✋ paper|✌️ scissors), Player 2: (✊ rock|✋ paper|✌️ scissors)\. (Player 1 wins|Player 2 wins|Draw)\./);
+  assert.match(el.textContent, /Latest round: Player 1: (✊ rock|✋ paper|✌️ scissors), Player 2: (✊ rock|✋ paper|✌️ scissors)\. (🏆 Player 1 wins|🏆 Player 2 wins|🤝 Draw)\./);
   ticks[0].fn();
   ticks[0].fn();
   assert.match(el.textContent, /Rounds played: 3/);

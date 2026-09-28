@@ -1,7 +1,7 @@
 (function () {
   var PICKS = ['rock', 'paper', 'scissors'];
   var BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
-  var OUTCOME = { player1: 'Player 1 wins.', player2: 'Player 2 wins.', draw: 'Draw.' };
+  var OUTCOME = { player1: '🏆 Player 1 wins.', player2: '🏆 Player 2 wins.', draw: '🤝 Draw.' };
   var SIGN = { rock: '✊', paper: '✋', scissors: '✌️' };
 
   function showPick(p) {
