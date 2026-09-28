@@ -87,7 +87,7 @@ test('each player shows its emoji before its name, in the rounds, the results an
   const p1 = '🤖 Player 1: ✊ rock, 👾 Player 2: ✌️ scissors. 🏆 🤖 Player 1 wins.';
   const lines = game.render(g).split('\n');
   assert.strictEqual(lines[0], 'Latest round: ' + p2);
-  assert.strictEqual(lines[1], 'Score: 🤖 Player 1 wins 1, 👾 Player 2 wins 1, draws 2');
+  assert.strictEqual(lines[1], 'Score: 🤖 Player 1 🏆 wins 1, 👾 Player 2 🏆 wins 1, 🤝 draws 2');
   assert.deepStrictEqual(lines.slice(5), [p2, drawRock, drawPaper, p1]);
   // no player name appears without its emoji right before it
   for (const line of lines) {
@@ -101,6 +101,14 @@ test('the score and round count after a fixed sequence of rounds', () => {
   const g = game.createGame(sequence([0, 0.9, 0.5, 0.9, 0.5, 0.5, 0.9, 0.5]));
   for (let i = 0; i < 4; i++) g.playRound();
   assert.deepStrictEqual(g.score(), { rounds: 4, player1: 2, player2: 1, draws: 1 });
+});
+
+test('the score line shows the result emoji for a known score', () => {
+  // rock/scissors, paper/paper, paper/rock, rock/rock
+  const g = game.createGame(sequence([0, 0.9, 0.5, 0.5, 0.5, 0, 0, 0]));
+  for (let i = 0; i < 4; i++) g.playRound();
+  const lines = game.render(g).split('\n');
+  assert.strictEqual(lines[1], 'Score: 🤖 Player 1 🏆 wins 2, 👾 Player 2 🏆 wins 0, 🤝 draws 2');
 });
 
 test('the history keeps only the last 10 rounds, newest first', () => {
@@ -126,7 +134,7 @@ test('the loop starts by itself and plays one round per tick', () => {
   ticks[0].fn();
   ticks[0].fn();
   assert.match(el.textContent, /Rounds played: 3/);
-  assert.match(el.textContent, /Score: 🤖 Player 1 wins \d+, 👾 Player 2 wins \d+, draws \d+/u);
+  assert.match(el.textContent, /Score: 🤖 Player 1 🏆 wins \d+, 👾 Player 2 🏆 wins \d+, 🤝 draws \d+/u);
 });
 
 test('index.html loads game.js with a plain script tag and has no img, canvas or svg', () => {
