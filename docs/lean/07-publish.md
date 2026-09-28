@@ -39,6 +39,15 @@ children, and still loads game.js with a plain script tag; pages.yml has the tri
 permissions, concurrency, pinned actions and copies exactly index.html, game.js and llms.txt;
 README.md has the play link and the test command.
 
+## Answers to the grill
+
+- The builder may change `test/game.test.js`. The frame's module script and stylesheet from
+  brand.cocode.dk are the one allowed exception to spec 01's "no ES modules" and spec 05's
+  "no external stylesheet": the game's own code stays a plain script, and no other external
+  stylesheet or module is allowed. Update those tests to say exactly that.
+- A deployment-ready workflow is enough. The builder cannot publish; the owner turns Pages on
+  and merging to main publishes the page.
+
 ## Out of scope
 
-Anything else: no other files, no styling, no change to the game.
+Any other file or change: no other styling, no change to the game.
