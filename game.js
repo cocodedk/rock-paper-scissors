@@ -54,7 +54,7 @@
     var history = game.history();
     return [
       'Latest round: ' + (history.length ? describeRound(history[0]) : 'none yet.'),
-      'Score: ' + P1 + ' wins ' + s.player1 + ', ' + P2 + ' wins ' + s.player2 + ', draws ' + s.draws,
+      'Score: ' + P1 + ' 🏆 wins ' + s.player1 + ', ' + P2 + ' 🏆 wins ' + s.player2 + ', 🤝 draws ' + s.draws,
       'Rounds played: ' + s.rounds,
       '',
       'Last 10 rounds, newest first:'
